@@ -6,12 +6,14 @@
 	var landType = [];
 	document.body.innerHTML = '<table><tr>'
 		+ '<td id="base" style="border: solid 3px blue; line-height: 0px"></td>'
-		+ '<td id="menu" style="vertical-align:top">'
+		+ '<td style="vertical-align:top">'
 			+ '<div><label><input type="checkbox" id="ui_grid" />Grid</label></div>'
-			+ '<div><select id="select"></select></div>'
-			+ '<div id="stats" style="background-color:white; overflow:scroll; width:250px; height:500px"></div>'
+			+ '<div id="select" style="width:256px; padding:0px"></div>'
 			+ '<div><input type="button" value="読み込み" id="read" /><input type="button" value="書き出し" id="write" /><br />'
 			+ '<textarea id="textarea" style="width:100%; height:200px"></textarea></div>'
+		+'</td>'
+		+ '<td id="menu" style="vertical-align:top">'
+			+ '<div id="stats" style="background-color:white; overflow:scroll; width:220px; height:500px"></div>'
 		+ '</td></tr></table>';
 	var base = document.getElementById('base');
 	function makeIMG(url, width, height) {
@@ -27,6 +29,7 @@
 		for(var j = 0; j < 24; j++){
 			var img = makeIMG("http://mesis.twimpt.com/hakomesis/image/sea.gif", 32, 32);
 			img.draggable = false;			
+			img.style["box-sizing"] = "border-box";
 			img.title = "(" + i + ", " + j + ") 海";
 			img.cellIndex = i * 24 + j;
 			img.cellX = i;
@@ -43,17 +46,38 @@
 		var checked = e.target.checked;
 		imgs.forEach(function (img) {
 			if(checked){
-				img.style["border-style"] = "solid";
-				img.style["border-width"] = "1px";
-				img.style["border-color"] = "#FFFFFF";
-				img.style["box-sizing"] = "border-box";
+				img.style["border"] = "solid 1px #000000";
 			}else{
 				img.style["border-style"] = "none";
 			}
 		})
 	});
 	var selection = document.getElementById("select");
-	landList.forEach(function(x){selection.append(new Option(x[1], x[0]))});
+	var selectionImgs = [];
+	var i = 0;
+	landList.forEach(function(x, index){
+		var img = makeIMG(x[0], 32, 32);
+		img.style["box-sizing"] = "border-box";
+		img.title = x[1];
+		img.landType = index;
+		img.isSelectCell = true;
+		selection.append(img);
+		selectionImgs.push(img);
+		if(i % 8 == 0) selection.append(document.createElement("br"));
+		i++;
+	});
+	function onSelectionClicked(e) {
+		if(e.target.isSelectCell) selectLandType(e.target.landType);
+	}
+	function selectLandType(landType) {
+		var before = selectionImgs[selection.selectedIndex || 0];
+		var after = selectionImgs[landType];
+		selection.selectedIndex = landType;
+		before.style["border-style"] = "none";
+		after.style["border"] = "solid 1px #FF0000";
+	}
+	selection.addEventListener("click", onSelectionClicked);
+	selectLandType(0);
 
 	var stats = document.getElementById("stats");
 
