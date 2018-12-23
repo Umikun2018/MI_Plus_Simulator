@@ -4,17 +4,16 @@
 
 	var imgs = [];
 	var landType = [];
-	document.body.innerHTML = '<table><tr><td id="base"></td>'
-		+'<td id="menu" style="vertical-align:top">'
-		+ '<div><label><input type="checkbox" id="ui_grid" />Grid</label></div>'
-		+ '<div><select id="select"></select></div>'
-		+ '<div id="stats" style="background-color:white; overflow:scroll; width:250px; height:500px"></div>'
-		+ '<div><input type="button" value="読み込み" id="read" /><input type="button" value="書き出し" id="write" /><br />'
-		+ '<textarea id="textarea" style="width:100%; height:200px"></textarea></div></td></tr></table>';
+	document.body.innerHTML = '<table><tr>'
+		+ '<td id="base" style="border: solid 3px blue; line-height: 0px"></td>'
+		+ '<td id="menu" style="vertical-align:top">'
+			+ '<div><label><input type="checkbox" id="ui_grid" />Grid</label></div>'
+			+ '<div><select id="select"></select></div>'
+			+ '<div id="stats" style="background-color:white; overflow:scroll; width:250px; height:500px"></div>'
+			+ '<div><input type="button" value="読み込み" id="read" /><input type="button" value="書き出し" id="write" /><br />'
+			+ '<textarea id="textarea" style="width:100%; height:200px"></textarea></div>'
+		+ '</td></tr></table>';
 	var base = document.getElementById('base');
-	base.style["border-style"] = "solid";
-	base.style["border-width"] = "3px";
-//	base.style["display"] = "inline-block";
 	function makeIMG(url, width, height) {
 		var img = document.createElement("img");
 		img.src = url;
@@ -27,6 +26,7 @@
 		if(i % 2 == 0) base.append(makeIMG("http://mesis.twimpt.com/hakomesis/image/space" + i + ".gif", 16, 32));
 		for(var j = 0; j < 24; j++){
 			var img = makeIMG("http://mesis.twimpt.com/hakomesis/image/sea.gif", 32, 32);
+			img.draggable = false;			
 			img.title = "(" + i + ", " + j + ") 海";
 			img.cellIndex = i * 24 + j;
 			img.cellX = i;
@@ -46,7 +46,7 @@
 				img.style["border-style"] = "solid";
 				img.style["border-width"] = "1px";
 				img.style["border-color"] = "#FFFFFF";
-				img.style["box-sizing"] = "border-box";				
+				img.style["box-sizing"] = "border-box";
 			}else{
 				img.style["border-style"] = "none";
 			}
@@ -57,22 +57,37 @@
 
 	var stats = document.getElementById("stats");
 
-	function onclick(e) {
+	var mousePushing = false;
+	function onMouseDown(e) {
 		if(!e.target.isCell) return;
+		mousePushing = true;
+		onMouseOver(e);
+	}
+
+	function onMouseUpOrLeave(e) {
+		mousePushing = false;
+	}
+
+	function onMouseOver(e) {
+		if(!(mousePushing && e.target.isCell)) return;
 		var img = e.target;
 		var type = selection.selectedIndex;
-		draw(img, type);
-		updateStats();
+		if(draw(img, type)) updateStats();		
 	}
 
 	function draw(img, type) {
-		if(!landList[type] || !img) return;
+		if(!landList[type] || !img) return false;
+		if(landType[img.cellIndex] == type) return false;
+		landType[img.cellIndex] = type;
 		img.src = landList[type][0];
 		img.title = "(" + img.cellX + ", " + img.cellY + ") " + landList[type][1];
-		landType[img.cellIndex] = type;
+		return true;
 	}
 
-	base.addEventListener("click", onclick);
+	base.addEventListener("mousedown", onMouseDown);
+	base.addEventListener("mouseover", onMouseOver);
+	base.addEventListener("mouseup", onMouseUpOrLeave);
+	base.addEventListener("mouseleave", onMouseUpOrLeave);
 
 	function updateStats() {
 		var count = [];
