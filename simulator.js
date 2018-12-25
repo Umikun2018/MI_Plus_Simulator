@@ -30,10 +30,10 @@
 			var img = makeIMG("http://mesis.twimpt.com/hakomesis/image/sea.gif", 32, 32);
 			img.draggable = false;			
 			img.style["box-sizing"] = "border-box";
-			img.title = "(" + i + ", " + j + ") 海";
+			img.title = "(" + j + ", " + i + ") 海";
 			img.cellIndex = i * 24 + j;
-			img.cellX = i;
-			img.cellY = j;
+			img.cellX = j;
+			img.cellY = i;
 			img.isCell = true;
 			base.append(img);
 			imgs.push(img);
